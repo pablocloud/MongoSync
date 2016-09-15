@@ -1,0 +1,26 @@
+{
+  "mongoFrom": {
+    "host": "localhost",
+    "port": "27017",
+    "username": "username",
+    "password": "password",
+    "authDb": "admin"
+  },
+  "mongoTo": {
+    "host": "localhost",
+    "port": "27017",
+    "username": "username",
+    "password": "password",
+    "authDb": "admin"
+  },
+  "collections": [
+    {
+      "databaseOrigin": "databaseOrigin",
+      "nameOrigin": "nameOrigin",
+      "fieldOrigin": "fieldOrigin",
+      "databaseFinal": "databaseFinal",
+      "nameFinal": "nameFinal",
+      "fieldFinal": "fieldFinal"
+    }
+  ]
+}
