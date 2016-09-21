@@ -8,11 +8,13 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import factories.ThreadsFactory;
 import model.Connection;
 import model.Task;
 import org.bson.Document;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -20,23 +22,46 @@ import java.util.concurrent.Executors;
 
 public class Controller {
 
-    public static void main(String... args) throws IOException {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        URL resource = new URL("file://" + new File("/home/pablo/Descargas/Insertar a mongo/config.json").getAbsolutePath());
+    private static final int concurrentThreads = 3;
+    private static final File configurationFile = new File("/home/pablo/Descargas/Insertar a mongo/config.json");
+
+    private static Config getConfig(File configurationFile) {
+        URL resource = null;
+        try {
+            resource = new URL("file://" + configurationFile.getAbsolutePath());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
         assert resource != null;
-        //noinspection InfiniteLoopStatement
-        while (true) {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            FileInputStream fis = new FileInputStream(resource.getFile());
-            InputStreamReader isr = new InputStreamReader(fis);
-            BufferedReader bufferedReader = new BufferedReader(isr);
-            StringBuilder sb = new StringBuilder();
-            String line;
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(resource.getFile());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        InputStreamReader isr = new InputStreamReader(fis);
+        BufferedReader bufferedReader = new BufferedReader(isr);
+        StringBuilder sb = new StringBuilder();
+        String line;
+        try {
             while ((line = bufferedReader.readLine()) != null) {
                 sb.append(line);
             }
-            String json = sb.toString();
-            Config config = new Gson().fromJson(json, Config.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String json = sb.toString();
+        return new Gson().fromJson(json, Config.class);
+    }
+
+    public static void main(String... args) throws IOException {
+        ExecutorService executorService = Executors.newFixedThreadPool(concurrentThreads, ThreadsFactory.getInstance());
+
+        //ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+        //noinspection InfiniteLoopStatement
+        while (true) {
+            Config config = getConfig(configurationFile);
             Arrays.stream(config.getCollections()).forEach((collectionFor) -> {
                 try {
                     Connection connection = new Connection();
@@ -63,44 +88,16 @@ public class Controller {
                     e.printStackTrace();
                 }
             });
-            for(int i = 0; i < config.getCollections().length; i++){
-                Client clientFrom = config.getMongoFrom();
-                Client clientTo = config.getMongoTo();
-                Collection collection = config.getCollections()[i];
-                String command = "mongodump -h " + clientFrom.getHost() + " -d '" + collection.getDatabaseOrigin() + "' -c '" + collection.getNameFinal() + "' -q '{$and : [{_id : {$gte : ObjectId(\"" + collection.getResultFrom() + "\") }}, {_id : {$lte : ObjectId(\"" + collection.getResultTo() + "\") }}]}' --archive=" + collection.getNameFinal() + ".bson";
-                String command2 = "mongorestore -h " + clientTo.getHost() + " -u " + clientTo.getUsername() + " -p " + clientTo.getPassword() + " --authenticationDatabase " + clientTo.getAuthDb() + " -d " + collection.getDatabaseFinal() + " -c " + collection.getNameFinal() + " --archive=" + collection.getNameFinal() + ".bson";
-                System.out.println(command);
-                ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
-                processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
-                Process process = null;
-                try {
-                    process = processBuilder.start();
-                    while(process.isAlive()){
-                        Thread.sleep(process.waitFor());
-                    }
-                    process.destroy();
-                } catch (IOException | InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.out.println(command2);
-                processBuilder = new ProcessBuilder("/bin/bash", "-c", command2);
-                processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
-                try {
-                    process = processBuilder.start();
-                    while(process.isAlive()){
-                        Thread.sleep(process.waitFor());
-                    }
-                    process.destroy();
-                } catch (IOException | InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            /*Arrays.stream(config.getCollections()).forEach((collection) -> {
-                Client clientFrom = config.getMongoFrom();
-                Client clientTo = config.getMongoTo();
 
-            });*/
-            //executor.shutdown();
+/*
+            for(Collection c : config.getCollections()){
+                Task task = new Task(config.getMongoFrom(), config.getMongoTo(), c);
+                executorService.execute(task);
+            }
+*/
+
+            Arrays.stream(config.getCollections()).forEach(collection -> executorService.execute(new Task(config.getMongoFrom(), config.getMongoTo(), collection)));
+            executorService.shutdown();
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
