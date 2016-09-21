@@ -22,7 +22,7 @@ public class Task extends Thread {
 
     @Override
     public void run() {
-        String command = "mongodump -h " + clientFrom.getHost() + " -d '" + collection.getDatabaseOrigin() + "' -c '" + collection + "' -q '{$and : [{_id : {$gte : ObjectId(\"" + collection.getResultFrom() + "\") }}, {_id : {$lte : ObjectId(\"" + collection.getResultTo() + "\") }}]}' --archive=" + collection.getNameOrigin() + ".bson";
+        String command = "mongodump -h " + clientFrom.getHost() + " -d '" + collection.getDatabaseOrigin() + "' -c '" + collection.getNameFinal() + "' -q '{$and : [{_id : {$gte : ObjectId(\"" + collection.getResultFrom() + "\") }}, {_id : {$lte : ObjectId(\"" + collection.getResultTo() + "\") }}]}' --archive=" + collection.getNameFinal() + ".bson";
         String command2 = "mongorestore -h " + clientTo.getHost() + " -u " + clientTo.getUsername() + " -p " + clientTo.getPassword() + " --authenticationDatabase " + clientTo.getAuthDb() + " -d " + collection.getDatabaseFinal() + " -c " + collection.getNameFinal() + " --archive=" + collection.getNameFinal() + ".bson";
         System.out.println(command);
         ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
@@ -30,14 +30,8 @@ public class Task extends Thread {
         Process process = null;
         try {
             process = processBuilder.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        br.lines().forEach(System.out::println);
-        try {
             process.waitFor();
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
         System.out.println(command2);
@@ -45,14 +39,8 @@ public class Task extends Thread {
         processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
         try {
             process = processBuilder.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        br.lines().forEach(System.out::println);
-        try {
             process.waitFor();
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }

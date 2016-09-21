@@ -19,8 +19,8 @@ public class Collection implements Serializable {
     private String fieldOrigin;
     @SerializedName("fieldFinal")
     private String fieldFinal;
-    private String resultFrom;
-    private String resultTo;
+    private Object resultFrom;
+    private Object resultTo;
 
     public Collection() {
 
@@ -83,19 +83,19 @@ public class Collection implements Serializable {
         this.fieldFinal = fieldFinal;
     }
 
-    public String getResultFrom() {
+    public Object getResultFrom() {
         return resultFrom;
     }
 
-    public void setResultFrom(String resultFrom) {
+    public void setResultFrom(Object resultFrom) {
         this.resultFrom = resultFrom;
     }
 
-    public String getResultTo() {
+    public Object getResultTo() {
         return resultTo;
     }
 
-    public void setResultTo(String resultTo) {
+    public void setResultTo(Object resultTo) {
         this.resultTo = resultTo;
     }
 }
