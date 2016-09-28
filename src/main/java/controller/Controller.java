@@ -23,7 +23,7 @@ import java.util.concurrent.Executors;
 public class Controller {
 
     private static final int concurrentThreads = 3;
-    private static final File configurationFile = new File("/home/pablo/Descargas/Insertar a mongo/config.json");
+    private static final File configurationFile = new File("config.json");
 
     private static Config getConfig(File configurationFile) {
         URL resource = null;
