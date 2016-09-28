@@ -1,7 +1,6 @@
 package controller;
 
 import classes.Client;
-import classes.Collection;
 import classes.Config;
 import com.google.gson.Gson;
 import com.mongodb.BasicDBObject;
@@ -23,7 +22,8 @@ import java.util.concurrent.Executors;
 public class Controller {
 
     private static final int concurrentThreads = 3;
-    private static final File configurationFile = new File("config.json");
+    private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
+    private static final File configurationFile = new File(CLASS_LOADER.getResource("config.json").getFile());
 
     private static Config getConfig(File configurationFile) {
         URL resource = null;
@@ -56,8 +56,6 @@ public class Controller {
 
     public static void main(String... args) throws IOException {
         ExecutorService executorService = Executors.newFixedThreadPool(concurrentThreads, ThreadsFactory.getInstance());
-
-        //ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         //noinspection InfiniteLoopStatement
         while (true) {

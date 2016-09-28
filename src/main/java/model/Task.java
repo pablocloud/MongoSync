@@ -2,11 +2,17 @@ package model;
 
 import classes.Client;
 import classes.Collection;
+import classes.Dump;
+import classes.Restore;
+import factories.ThreadsFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Task extends Thread {
 
@@ -22,26 +28,12 @@ public class Task extends Thread {
 
     @Override
     public void run() {
-        String command = "mongodump -h " + clientFrom.getHost() + " -d '" + collection.getDatabaseOrigin() + "' -c '" + collection.getNameFinal() + "' -q '{$and : [{_id : {$gte : ObjectId(\"" + collection.getResultFrom() + "\") }}, {_id : {$lte : ObjectId(\"" + collection.getResultTo() + "\") }}]}' --archive=" + collection.getNameFinal() + ".bson";
-        String command2 = "mongorestore -h " + clientTo.getHost() + " -u " + clientTo.getUsername() + " -p " + clientTo.getPassword() + " --authenticationDatabase " + clientTo.getAuthDb() + " -d " + collection.getDatabaseFinal() + " -c " + collection.getNameFinal() + " --archive=" + collection.getNameFinal() + ".bson";
-        System.out.println(command);
-        ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
-        processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
-        Process process = null;
-        try {
-            process = processBuilder.start();
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println(command2);
-        processBuilder = new ProcessBuilder("/bin/bash", "-c", command2);
-        processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
-        try {
-            process = processBuilder.start();
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        ExecutorService executorService = Executors.newFixedThreadPool(1, ThreadsFactory.getInstance());
+
+        ArrayList<Thread> threadList = new ArrayList<>();
+        threadList.add(new Dump(clientFrom, clientTo, collection));
+        threadList.add(new Restore(clientTo, collection));
+
+        threadList.forEach(executorService::execute);
     }
 }

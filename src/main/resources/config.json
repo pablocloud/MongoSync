@@ -1,0 +1,26 @@
+{
+  "mongoFrom": {
+    "host": "",
+    "port": "",
+    "username": "",
+    "password": "",
+    "authDB": ""
+  },
+  "mongoTo": {
+    "host": "",
+    "port": "",
+    "username": "",
+    "password": "",
+    "authDB": ""
+  },
+  "collections": [
+    {
+      "databaseOrigin": "",
+      "databaseFinal": "",
+      "nameOrigin": "",
+      "nameFinal": "",
+      "fieldOrigin": "",
+      "fieldFinal": ""
+    }
+  ]
+}
