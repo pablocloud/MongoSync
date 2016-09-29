@@ -68,27 +68,29 @@ public class Controller {
         while (true) {
             Config config = getConfig(configurationFile);
             executorService = Executors.newFixedThreadPool(config.getCollections().length, ThreadsFactory.getInstance());
-            Arrays.stream(config.getCollections()).forEach((collectionFor) -> {
+            Arrays.stream(config.getCollections()).forEach((collection) -> {
                 try {
                     Connection connection = new Connection();
-                    String database = collectionFor.getDatabaseFinal();
-                    String collection = collectionFor.getNameFinal();
+                    String database = collection.getDatabaseFinal();
+                    String collectionName = collection.getNameFinal();
                     Client clientTo = config.getMongoTo();
                     MongoClient mongoClient = connection.getConnection(clientTo);
                     MongoDatabase mongoDatabase = mongoClient.getDatabase(database);
-                    MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(collection);
+                    MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(collectionName);
                     Document first = mongoCollection.find().sort(new BasicDBObject("_id", -1)).limit(1).first();
                     Object idFrom = first.get("_id");
-                    collectionFor.setResultFrom(idFrom);
+
+                    collection.setResultFrom(idFrom);
                     mongoClient.close();
                     Client clientFrom = config.getMongoFrom();
                     mongoClient = connection.getConnection(clientFrom);
                     mongoDatabase = mongoClient.getDatabase(database);
-                    mongoCollection = mongoDatabase.getCollection(collection);
+                    mongoCollection = mongoDatabase.getCollection(collectionName);
                     first = mongoCollection.find().sort(new BasicDBObject("_id", -1)).limit(1).first();
                     Object idTo = first.get("_id");
-                    collectionFor.setResultTo(idTo);
-                    System.out.println(collection + " de " + idFrom + " hasta " + idTo);
+
+                    collection.setResultTo(idTo);
+                    System.out.println(collectionName + " de " + idFrom + " hasta " + idTo);
                     mongoClient.close();
                 } catch (Exception e) {
                     e.printStackTrace();
