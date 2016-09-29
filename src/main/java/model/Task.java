@@ -28,12 +28,25 @@ public class Task extends Thread {
 
     @Override
     public void run() {
-        ExecutorService executorService = Executors.newFixedThreadPool(1, ThreadsFactory.getInstance());
+        //ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadsFactory.getInstance());
 
-        ArrayList<Thread> threadList = new ArrayList<>();
-        threadList.add(new Dump(clientFrom, clientTo, collection));
-        threadList.add(new Restore(clientTo, collection));
+//        ArrayList<Thread> threadList = new ArrayList<>();
+//        threadList.add(new Dump(clientFrom, clientTo, collection));
+//        threadList.add(new Restore(clientTo, collection));
+//
+//        threadList.forEach(executorService::execute);
+        Dump dump = new Dump(clientFrom, clientTo, collection);
+        dump.run();
+        /*while(dump.isAlive()){
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }*/
+        //executorService.execute(dump);
+        Restore restore = new Restore(clientTo, collection);
+        restore.run();
 
-        threadList.forEach(executorService::execute);
     }
 }

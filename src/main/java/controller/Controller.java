@@ -1,7 +1,9 @@
 package controller;
 
 import classes.Client;
+import classes.Collection;
 import classes.Config;
+import classes.TheLast;
 import com.google.gson.Gson;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
@@ -15,20 +17,24 @@ import org.bson.Document;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Controller {
 
-    private static final int concurrentThreads = 3;
+    private static final int concurrentThreads = 1;
     private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
     private static final File configurationFile = new File(CLASS_LOADER.getResource("config.json").getFile());
 
     private static Config getConfig(File configurationFile) {
         URL resource = null;
         try {
-            resource = new URL("file://" + configurationFile.getAbsolutePath());
+            resource = new URL("file://" + new File("/home/pablo/Descargas/Insertar a mongo/config.json").getAbsolutePath());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -54,12 +60,14 @@ public class Controller {
         return new Gson().fromJson(json, Config.class);
     }
 
-    public static void main(String... args) throws IOException {
-        ExecutorService executorService = Executors.newFixedThreadPool(concurrentThreads, ThreadsFactory.getInstance());
-
+    public static void main(String... args) throws IOException, InterruptedException {
+        Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
+        mongoLogger.setLevel(Level.SEVERE);
         //noinspection InfiniteLoopStatement
+        ExecutorService executorService;
         while (true) {
             Config config = getConfig(configurationFile);
+            executorService = Executors.newFixedThreadPool(config.getCollections().length, ThreadsFactory.getInstance());
             Arrays.stream(config.getCollections()).forEach((collectionFor) -> {
                 try {
                     Connection connection = new Connection();
@@ -87,20 +95,15 @@ public class Controller {
                 }
             });
 
-/*
-            for(Collection c : config.getCollections()){
-                Task task = new Task(config.getMongoFrom(), config.getMongoTo(), c);
-                executorService.execute(task);
-            }
-*/
-
-            Arrays.stream(config.getCollections()).forEach(collection -> executorService.execute(new Task(config.getMongoFrom(), config.getMongoTo(), collection)));
+            ArrayList<Task> tasks = new ArrayList<>();
+            Arrays.stream(config.getCollections()).forEach(collection -> tasks.add(new Task(config.getMongoFrom(), config.getMongoTo(), collection)));
+            tasks.forEach(executorService::execute);
             executorService.shutdown();
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+            System.out.println("EXECUTOR DEAD");
+
+            Thread.sleep(1000);
+
         }
 
     }
