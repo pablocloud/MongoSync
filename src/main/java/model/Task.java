@@ -3,6 +3,8 @@ package model;
 import classes.Client;
 import classes.Collection;
 import classes.Dump;
+import classes.PylonHammer;
+import classes.Query;
 import classes.Restore;
 import factories.ThreadsFactory;
 
@@ -62,23 +64,27 @@ public class Task extends Thread {
     @Override
     public void run() {
         ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadsFactory.getInstance());
-
-        ArrayList<Thread> threadList = new ArrayList<>();
-        threadList.add(new Dump(clientFrom, clientTo, collection));
-        threadList.add(new Restore(clientTo, collection));
-        threadList.forEach(executorService::execute);
-/*        Dump dump = new Dump(clientFrom, clientTo, collection);
-        dump.run();
-        *//*while(dump.isAlive()){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        try {
+            Query query = new Query(clientFrom, clientTo, collection);
+            query.run();
+            while (query.isAlive()) {
+                Thread.sleep(100);
             }
-        }*//*
-        //executorService.execute(dump);
-        Restore restore = new Restore(clientTo, collection);
-        restore.run();*/
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (collection.getDiff() < 500) {
+            System.out.println("La diferencia es menor a 500, usando sincronización");
+            ArrayList<Thread> threadList = new ArrayList<>();
+            threadList.add(new Dump(clientFrom, clientTo, collection));
+            threadList.add(new Restore(clientTo, collection));
+            threadList.forEach(Thread::run);
+        } else {
+            System.out.println("La diferencia es mayor a 500, usando técnica del martillo pilón");
+            ArrayList<Thread> threadList = new ArrayList<>();
+            threadList.add(new PylonHammer(getClientFrom(), getClientTo(), getCollection()));
+            threadList.forEach(Thread::run);
+        }
 
     }
 }

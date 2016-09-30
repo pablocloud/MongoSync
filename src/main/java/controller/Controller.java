@@ -1,18 +1,11 @@
 package controller;
 
-import classes.Client;
 import classes.Collection;
 import classes.Config;
-import classes.TheLast;
+import classes.Query;
 import com.google.gson.Gson;
-import com.mongodb.BasicDBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import factories.ThreadsFactory;
-import model.Connection;
 import model.Task;
-import org.bson.Document;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -65,49 +58,40 @@ public class Controller {
         mongoLogger.setLevel(Level.SEVERE);
         //noinspection InfiniteLoopStatement
         ExecutorService executorService;
+        int contadorCurl = 0;
         while (true) {
             Config config = getConfig(configurationFile);
+            System.out.println("Colecciones a actualizar : " + config.getCollections().length);
             executorService = Executors.newFixedThreadPool(config.getCollections().length, ThreadsFactory.getInstance());
-            Arrays.stream(config.getCollections()).forEach((collection) -> {
-                try {
-                    Connection connection = new Connection();
-                    String database = collection.getDatabaseFinal();
-                    String collectionName = collection.getNameFinal();
-                    Client clientTo = config.getMongoTo();
-                    MongoClient mongoClient = connection.getConnection(clientTo);
-                    MongoDatabase mongoDatabase = mongoClient.getDatabase(database);
-                    MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(collectionName);
-                    Document first = mongoCollection.find().sort(new BasicDBObject("_id", -1)).limit(1).first();
-                    Object idFrom = first.get("_id");
-
-                    collection.setResultFrom(idFrom);
-                    mongoClient.close();
-                    Client clientFrom = config.getMongoFrom();
-                    mongoClient = connection.getConnection(clientFrom);
-                    mongoDatabase = mongoClient.getDatabase(database);
-                    mongoCollection = mongoDatabase.getCollection(collectionName);
-                    first = mongoCollection.find().sort(new BasicDBObject("_id", -1)).limit(1).first();
-                    Object idTo = first.get("_id");
-
-                    collection.setResultTo(idTo);
-                    System.out.println(collectionName + " de " + idFrom + " hasta " + idTo);
-                    mongoClient.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-
             ArrayList<Task> tasks = new ArrayList<>();
             Arrays.stream(config.getCollections()).forEach(collection -> tasks.add(new Task(config.getMongoFrom(), config.getMongoTo(), collection)));
             tasks.forEach(executorService::execute);
             executorService.shutdown();
             executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
             System.out.println("EXECUTOR DEAD");
-
+            contadorCurl++;
+            if (contadorCurl >= 100) {
+                String curl = "Colecciones en sincronización : ";
+                for (Collection collection : config.getCollections()) {
+                    curl += collection.getDatabaseOrigin() + " " + collection.getNameOrigin() + ". ";
+                }
+                ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "curl -X POST --data-urlencode 'payload={\"text\" : \"" + curl + "\", \"channel\" : \"#monguitotrace\"}' https://hooks.slack.com/services/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");
+                processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
+                Process process;
+                try {
+                    process = processBuilder.start();
+                    while (process.isAlive()) {
+                        BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                        in.lines().forEach(line -> System.out.println(" ID CURL : " + String.valueOf(Thread.currentThread().getId()) + " " + line));
+                        Thread.sleep(process.waitFor());
+                    }
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                contadorCurl = 0;
+            }
             Thread.sleep(1000);
-
         }
-
     }
 
     /**

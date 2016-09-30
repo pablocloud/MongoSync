@@ -21,6 +21,7 @@ public class Collection implements Serializable {
     private String fieldFinal;
     private Object resultFrom;
     private Object resultTo;
+    private int diff;
 
     public Collection() {
 
@@ -97,5 +98,13 @@ public class Collection implements Serializable {
 
     public void setResultTo(Object resultTo) {
         this.resultTo = resultTo;
+    }
+
+    public int getDiff() {
+        return diff;
+    }
+
+    public void setDiff(int diff) {
+        this.diff = diff;
     }
 }

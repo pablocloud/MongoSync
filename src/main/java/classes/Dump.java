@@ -48,7 +48,6 @@ public class Dump extends Thread {
     @Override
     public void run() {
         String command = "mongodump -h " + clientFrom.getHost() + " -d '" + collection.getDatabaseOrigin() + "' -c '" + collection.getNameFinal() + "' -q '{$and : [{_id : {$gt : ObjectId(\"" + collection.getResultFrom() + "\") }}, {_id : {$lte : ObjectId(\"" + collection.getResultTo() + "\") }}]}' --archive=" + collection.getNameFinal() + ".bson";
-        System.out.println(" ID THREAD DUMP : " + String.valueOf(Thread.currentThread().getId()) + " " + command);
         ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
         processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
         Process process;
