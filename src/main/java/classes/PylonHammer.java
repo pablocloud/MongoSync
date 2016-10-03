@@ -27,23 +27,25 @@ public class PylonHammer extends Thread {
     MongoDatabase mongoDatabase1;
     MongoCollection<Document> mongoCollection;
     MongoCollection<Document> mongoCollection1;
+    private int maxDiff;
 
     /**
      * Main constructor.
-     *
-     * @param clientFrom Client
+     *  @param clientFrom Client
      * @param clientTo   Client
      * @param collection Collection
+     * @param maxDiff
      */
-    public PylonHammer(Client clientFrom, Client clientTo, Collection collection) {
+    public PylonHammer(Client clientFrom, Client clientTo, Collection collection, int maxDiff) {
         this.clientFrom = clientFrom;
         this.clientTo = clientTo;
         this.collection = collection;
+        this.maxDiff = maxDiff;
     }
 
     @Override
     public void run() {
-        System.out.println("PYLON HAMMER STARTED ON " + collection.getNameFinal() + " WILL ONLY GET 500 DOCUMENTS ON EACH CALL.");
+        System.out.println("PYLON HAMMER STARTED ON " + collection.getNameFinal() + " WILL ONLY GET 200 DOCUMENTS ON EACH CALL.");
         connection = new Connection();
         mongoClient = connection.getConnection(clientFrom);
         mongoClient1 = connection.getConnection(clientTo);
@@ -52,7 +54,7 @@ public class PylonHammer extends Thread {
         mongoDatabase1 = mongoClient1.getDatabase(collection.getDatabaseFinal());
         mongoCollection1 = mongoDatabase1.getCollection(collection.getNameFinal());
         int current = 0;
-        FindIterable<Document> limit = mongoCollection.find(new BasicDBObject("_id", new BasicDBObject("$gt", new ObjectId("" + collection.getResultFrom() + "")))).sort(new BasicDBObject("_id", 1)).limit(500);
+        FindIterable<Document> limit = mongoCollection.find(new BasicDBObject("_id", new BasicDBObject("$gt", new ObjectId("" + collection.getResultFrom() + "")))).sort(new BasicDBObject("_id", 1)).limit(maxDiff);
         for (Document doc : limit) {
             mongoCollection1.insertOne(doc);
             current++;

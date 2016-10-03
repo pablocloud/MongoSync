@@ -22,11 +22,13 @@ public class Task extends Thread {
     private Client clientTo;
     private Collection collection;
     private ExecutorService executorService;
+    private int maxDiff;
 
-    public Task(Client clientFrom, Client clientTo, Collection collection) {
+    public Task(Client clientFrom, Client clientTo, Collection collection, int maxDiff) {
         this.clientFrom = clientFrom;
         this.clientTo = clientTo;
         this.collection = collection;
+        this.maxDiff = maxDiff;
     }
 
     public Client getClientFrom() {
@@ -73,16 +75,16 @@ public class Task extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (collection.getDiff() < 500) {
-            System.out.println("La diferencia es menor a 500, usando sincronización");
+        if (collection.getDiff() < maxDiff) {
+            System.out.println("La diferencia es menor a " + maxDiff + ", usando sincronización");
             ArrayList<Thread> threadList = new ArrayList<>();
             threadList.add(new Dump(clientFrom, clientTo, collection));
             threadList.add(new Restore(clientTo, collection));
             threadList.forEach(Thread::run);
         } else {
-            System.out.println("La diferencia es mayor a 500, usando técnica del martillo pilón");
+            System.out.println("La diferencia es mayor a " + maxDiff + ", usando técnica del martillo pilón");
             ArrayList<Thread> threadList = new ArrayList<>();
-            threadList.add(new PylonHammer(getClientFrom(), getClientTo(), getCollection()));
+            threadList.add(new PylonHammer(getClientFrom(), getClientTo(), getCollection(), maxDiff));
             threadList.forEach(Thread::run);
         }
 
