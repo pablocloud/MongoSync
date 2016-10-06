@@ -22,18 +22,21 @@ public class Collection implements Serializable {
     private Object resultFrom;
     private Object resultTo;
     private int diff;
+    @SerializedName("indexes")
+    private IndexField[] indexes;
 
     public Collection() {
 
     }
 
-    public Collection(String databaseOrigin, String databaseFinal, String nameOrigin, String nameFinal, String fieldOrigin, String fieldFinal) {
+    public Collection(String databaseOrigin, String databaseFinal, String nameOrigin, String nameFinal, String fieldOrigin, String fieldFinal, IndexField[] indexes) {
         this.databaseOrigin = databaseOrigin;
         this.databaseFinal = databaseFinal;
         this.nameOrigin = nameOrigin;
         this.nameFinal = nameFinal;
         this.fieldOrigin = fieldOrigin;
         this.fieldFinal = fieldFinal;
+        this.indexes = indexes;
     }
 
     public String getDatabaseOrigin() {
@@ -106,5 +109,13 @@ public class Collection implements Serializable {
 
     public void setDiff(int diff) {
         this.diff = diff;
+    }
+
+    public IndexField[] getIndexes() {
+        return indexes;
+    }
+
+    public void setIndexes(IndexField[] indexes) {
+        this.indexes = indexes;
     }
 }

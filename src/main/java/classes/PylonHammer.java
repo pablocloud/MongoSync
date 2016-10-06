@@ -6,8 +6,11 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import model.Connection;
+import model.SyncLogger;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+
+import java.time.Instant;
 
 /**
  * Created by pablo on 30/09/16.
@@ -29,9 +32,12 @@ public class PylonHammer extends Thread {
     MongoCollection<Document> mongoCollection1;
     private int maxDiff;
 
+    private SyncLogger logger = new SyncLogger();
+
     /**
      * Main constructor.
-     *  @param clientFrom Client
+     *
+     * @param clientFrom Client
      * @param clientTo   Client
      * @param collection Collection
      * @param maxDiff
@@ -45,7 +51,7 @@ public class PylonHammer extends Thread {
 
     @Override
     public void run() {
-        System.out.println("PYLON HAMMER STARTED ON " + collection.getNameFinal() + " WILL ONLY GET 200 DOCUMENTS ON EACH CALL.");
+        logger.logMessage("ID THREAD PYLON   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "       " + collection.getNameFinal(), SyncLogger.ANSI_CYAN, false);
         connection = new Connection();
         mongoClient = connection.getConnection(clientFrom);
         mongoClient1 = connection.getConnection(clientTo);
@@ -53,16 +59,12 @@ public class PylonHammer extends Thread {
         mongoCollection = mongoDatabase.getCollection(collection.getNameFinal());
         mongoDatabase1 = mongoClient1.getDatabase(collection.getDatabaseFinal());
         mongoCollection1 = mongoDatabase1.getCollection(collection.getNameFinal());
-        int current = 0;
         FindIterable<Document> limit = mongoCollection.find(new BasicDBObject("_id", new BasicDBObject("$gt", new ObjectId("" + collection.getResultFrom() + "")))).sort(new BasicDBObject("_id", 1)).limit(maxDiff);
         for (Document doc : limit) {
             mongoCollection1.insertOne(doc);
-            current++;
-            if(current % 100 == 0){
-                System.out.println("PYLON HAMMER STARTED ON " + collection.getNameFinal() + " ON POSITION " + current);
-            }
         }
         mongoClient1.close();
         mongoClient.close();
+        logger.logMessage("ID THREAD PYLON   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "       " + collection.getNameFinal() + " finished", SyncLogger.ANSI_CYAN, false);
     }
 }

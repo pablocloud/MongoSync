@@ -3,6 +3,8 @@ package model;
 import classes.Client;
 import classes.Collection;
 import classes.Dump;
+import classes.Index;
+import classes.IndexField;
 import classes.PylonHammer;
 import classes.Query;
 import classes.Restore;
@@ -13,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -76,17 +79,19 @@ public class Task extends Thread {
             e.printStackTrace();
         }
         if (collection.getDiff() < maxDiff) {
-            System.out.println("La diferencia es menor a " + maxDiff + ", usando sincronización");
             ArrayList<Thread> threadList = new ArrayList<>();
             threadList.add(new Dump(clientFrom, clientTo, collection));
             threadList.add(new Restore(clientTo, collection));
             threadList.forEach(Thread::run);
         } else {
-            System.out.println("La diferencia es mayor a " + maxDiff + ", usando técnica del martillo pilón");
             ArrayList<Thread> threadList = new ArrayList<>();
             threadList.add(new PylonHammer(getClientFrom(), getClientTo(), getCollection(), maxDiff));
             threadList.forEach(Thread::run);
         }
-
+        if(collection.getIndexes() != null){
+            for(IndexField indexField : collection.getIndexes()){
+                new Index(clientTo, collection, indexField).run();
+            }
+        }
     }
 }

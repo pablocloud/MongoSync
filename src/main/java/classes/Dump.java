@@ -1,5 +1,7 @@
 package classes;
 
+import model.SyncLogger;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -9,9 +11,12 @@ import java.io.InputStreamReader;
  * Created by eduardo on 23/09/16.
  */
 public class Dump extends Thread {
+
     private Client clientFrom;
     private Client clientTo;
     private Collection collection;
+
+    private SyncLogger logger = new SyncLogger();
 
     public Dump(){}
 
@@ -55,7 +60,7 @@ public class Dump extends Thread {
             process = processBuilder.start();
             while(process.isAlive()){
                 BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                in.lines().forEach(line -> System.out.println(" ID THREAD DUMP : " + String.valueOf(Thread.currentThread().getId()) + " " + line));
+                in.lines().forEach(line -> logger.logMessage("ID THREAD RESTORE : " + Thread.currentThread().getId() + " : " + line , SyncLogger.ANSI_BLUE, false));
                 Thread.sleep(process.waitFor());
             }
         } catch (IOException | InterruptedException e) {

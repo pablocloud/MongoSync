@@ -5,6 +5,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import model.Connection;
+import model.SyncLogger;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
@@ -12,7 +13,9 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.gt;
 import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Filters.lt;
 import static com.mongodb.client.model.Filters.lte;
 
 /**
@@ -36,6 +39,8 @@ public class Query extends Thread {
     private Object idTo;
     private int count;
 
+    private SyncLogger logger = new SyncLogger();
+
     /**
      * Main constructor.
      *
@@ -51,50 +56,33 @@ public class Query extends Thread {
 
     @Override
     public void run() {
-        try {
-            connection = new Connection();
-            database = collection.getDatabaseFinal();
-            collectionName = collection.getNameFinal();
-            mongoClient = connection.getConnection(clientTo);
-            mongoDatabase = mongoClient.getDatabase(database);
-            mongoCollection = mongoDatabase.getCollection(collectionName);
-            first = mongoCollection.find().sort(new BasicDBObject("_id", -1)).limit(1).first();
-            idFrom = first.get("_id");
-            collection.setResultFrom(idFrom);
-            mongoClient.close();
-            mongoClient = connection.getConnection(clientFrom);
-            mongoDatabase = mongoClient.getDatabase(database);
-            mongoCollection = mongoDatabase.getCollection(collectionName);
-            first = mongoCollection.find().sort(new BasicDBObject("_id", -1)).limit(1).first();
-            idTo = first.get("_id");
-            count = Math.toIntExact(mongoCollection.count(and(gte("_id", new ObjectId(idFrom.toString())), lte("_id", new ObjectId(idTo.toString())))));
-            collection.setDiff(count);
-            collection.setResultFrom(idFrom);
-            collection.setResultTo(idTo);
-            String curl = collection.getNameFinal().toUpperCase() + ". La diferencia es de : " + (count - 1) + " documentos.";
-            System.out.println(curl);
-            ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "curl -X POST --data-urlencode 'payload={\"text\" : \"" + curl + "\", \"channel\" : \"#monguitotrace\"}' url");
-            processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
-            Process process;
-            process = processBuilder.start();
-            while (process.isAlive()) {
-                Thread.sleep(process.waitFor());
-            }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            String curl = e.getMessage();
-            System.out.println(curl);
-            ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "curl -X POST --data-urlencode 'payload={\"text\" : \"" + curl + "\", \"channel\" : \"#monguitotrace\"}' url");
-            processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
-            Process process;
-            try {
-                process = processBuilder.start();
-                while (process.isAlive()) {
-                    Thread.sleep(process.waitFor());
-                }
-            } catch (IOException | InterruptedException e1) {
-                e1.printStackTrace();
-            }
+        connection = new Connection();
+        database = collection.getDatabaseFinal();
+        collectionName = collection.getNameFinal();
+        mongoClient = connection.getConnection(clientTo);
+        mongoDatabase = mongoClient.getDatabase(database);
+        mongoCollection = mongoDatabase.getCollection(collectionName);
+        first = mongoCollection.find().sort(new BasicDBObject("_id", -1)).limit(1).first();
+        idFrom = first.get("_id");
+        collection.setResultFrom(idFrom);
+        mongoClient.close();
+        mongoClient = connection.getConnection(clientFrom);
+        mongoDatabase = mongoClient.getDatabase(database);
+        mongoCollection = mongoDatabase.getCollection(collectionName);
+        first = mongoCollection.find().sort(new BasicDBObject("_id", -1)).limit(1).first();
+        idTo = first.get("_id");
+        count = Math.toIntExact(mongoCollection.count(and(gt("_id", new ObjectId(idFrom.toString())), lt("_id", new ObjectId(idTo.toString())))));
+        if (count == -1) {
+            count = 0;
         }
+        collection.setDiff(count);
+        collection.setResultFrom(idFrom);
+        collection.setResultTo(idTo);
+        String collectionStr = collection.getNameFinal();
+        while(collectionStr.length() < 50){
+            collectionStr = collectionStr + " ";
+        }
+        String curl = collectionStr + "La diferencia es de : " + (count) + " documentos.";
+        logger.logMessage(curl, SyncLogger.ANSI_WHITE, true);
     }
 }

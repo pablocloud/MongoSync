@@ -1,5 +1,7 @@
 package classes;
 
+import model.SyncLogger;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -9,8 +11,10 @@ import java.io.InputStreamReader;
  * Created by eduardo on 23/09/16.
  */
 public class Restore extends Thread {
+
     private Client clientTo;
     private Collection collection;
+    private SyncLogger logger = new SyncLogger();
 
     public Restore(){}
 
@@ -45,7 +49,7 @@ public class Restore extends Thread {
             process = processBuilder.start();
             while(process.isAlive()){
                 BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                in.lines().forEach(line -> System.out.println(" ID THREAD RESTORE : " + String.valueOf(Thread.currentThread().getId() + " " + line)));
+                in.lines().forEach(line -> logger.logMessage("ID THREAD RESTORE : " + Thread.currentThread().getId() + " : " + line , SyncLogger.ANSI_GREEN, false));
                 Thread.sleep(process.waitFor());
             }
         } catch (IOException | InterruptedException e) {
