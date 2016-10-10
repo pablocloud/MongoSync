@@ -16,7 +16,7 @@ public class Index extends Thread {
     private Client client;
     private Collection collection;
     private IndexField index;
-    private SyncLogger logger = new SyncLogger();
+    private SyncLogger syncLogger;
 
     public Index (Client client, Collection collection, IndexField index){
         this.client = client;
@@ -29,7 +29,7 @@ public class Index extends Thread {
         MongoClient mongoClient = new Connection().getConnection(client);
         MongoDatabase database = mongoClient.getDatabase(collection.getDatabaseFinal());
         MongoCollection<Document> collectionDb = database.getCollection(this.collection.getNameFinal());
-        logger.logMessage("ID THREAD INDEX   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "     " + collection.getNameFinal(), SyncLogger.ANSI_CYAN, false);
+        syncLogger.logMessage("ID THREAD INDEX   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "     " + collection.getNameFinal(), SyncLogger.ANSI_CYAN, false);
         collectionDb.createIndex(new BasicDBObject(this.index.getName(), this.index.getOrder()), new IndexOptions().background(true));
         mongoClient.close();
     }

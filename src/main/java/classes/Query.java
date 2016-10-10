@@ -39,7 +39,7 @@ public class Query extends Thread {
     private Object idTo;
     private int count;
 
-    private SyncLogger logger = new SyncLogger();
+    private SyncLogger syncLogger;
 
     /**
      * Main constructor.
@@ -83,6 +83,6 @@ public class Query extends Thread {
             collectionStr = collectionStr + " ";
         }
         String curl = collectionStr + "La diferencia es de : " + (count) + " documentos.";
-        logger.logMessage(curl, SyncLogger.ANSI_WHITE, true);
+        syncLogger.logMessage(curl, SyncLogger.ANSI_WHITE, true);
     }
 }

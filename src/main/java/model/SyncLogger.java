@@ -1,5 +1,6 @@
 package model;
 
+import classes.Parameters;
 import controller.Controller;
 
 import java.io.File;
@@ -17,11 +18,20 @@ public class SyncLogger {
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
 
-    public SyncLogger() {
-    }
-
+    private Parameters parameters;
     private ProcessBuilder processBuilder;
     private Process process;
+
+    private static SyncLogger syncLogger;
+
+    private SyncLogger(){}
+
+    public static SyncLogger getInstance(){
+        if (syncLogger == null){
+            syncLogger = new SyncLogger();
+        }
+        return syncLogger;
+    }
 
     /**
      * First filter between LocalLog and a SlackLog.
@@ -56,7 +66,7 @@ public class SyncLogger {
      */
     private void slackLog(String message) {
         processBuilder = new ProcessBuilder("/bin/bash", "-c", "curl -X POST --data-urlencode 'payload={\"text\" : \"" + message + "\", \"channel\" : \"#monguitotrace\"}' https://hooks.slack.com/services/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");
-        processBuilder.directory(new File(Controller.WORKING_DIRECTORY));
+        processBuilder.directory(new File(parameters.getWorkingDirectory()));
         process = null;
         try {
             process = processBuilder.start();
@@ -68,4 +78,11 @@ public class SyncLogger {
         }
     }
 
+    public Parameters getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Parameters parameters) {
+        this.parameters = parameters;
+    }
 }

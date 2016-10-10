@@ -15,7 +15,7 @@ public class Restore extends Thread {
     private Client clientTo;
     private Collection collection;
     private Parameters parameters;
-    private SyncLogger logger = new SyncLogger();
+    private SyncLogger syncLogger;
 
     public Restore(){}
 
@@ -51,7 +51,7 @@ public class Restore extends Thread {
             process = processBuilder.start();
             while(process.isAlive()){
                 BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                in.lines().forEach(line -> logger.logMessage("ID THREAD RESTORE : " + Thread.currentThread().getId() + " : " + line , SyncLogger.ANSI_GREEN, false));
+                in.lines().forEach(line -> syncLogger.logMessage("ID THREAD RESTORE : " + Thread.currentThread().getId() + " : " + line , SyncLogger.ANSI_GREEN, false));
                 Thread.sleep(process.waitFor());
             }
         } catch (IOException | InterruptedException e) {
