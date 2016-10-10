@@ -53,6 +53,11 @@ public class Dump extends Thread {
     @Override
     public void run() {
         String command = "mongodump -h " + clientFrom.getHost() + " -d '" + collection.getDatabaseOrigin() + "' -c '" + collection.getNameFinal() + "' -q '{$and : [{_id : {$gt : ObjectId(\"" + collection.getResultFrom() + "\") }}, {_id : {$lte : ObjectId(\"" + collection.getResultTo() + "\") }}]}' --archive=" + collection.getNameFinal() + ".bson";
+        if(clientFrom.getPassword() != null && clientFrom.getUsername() != null && clientFrom.getAuthDb() != null){
+            if(!clientFrom.getPassword().isEmpty() && !clientFrom.getUsername().isEmpty() && !clientFrom.getAuthDb().isEmpty()){
+                command.concat(" -u " + clientFrom.getUsername() + " -p " + clientFrom.getPassword() + " --authenticationDatabase " + clientFrom.getAuthDb() + "");
+            }
+        }
         ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
         processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
         Process process;

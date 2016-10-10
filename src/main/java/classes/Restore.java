@@ -41,7 +41,12 @@ public class Restore extends Thread {
 
     @Override
     public void run() {
-        String command = "mongorestore -h " + clientTo.getHost() + " -u " + clientTo.getUsername() + " -p " + clientTo.getPassword() + " --authenticationDatabase " + clientTo.getAuthDb() + " -d " + collection.getDatabaseFinal() + " -c " + collection.getNameFinal() + " --archive=" + collection.getNameFinal() + ".bson";
+        String command = "mongorestore -h " + clientTo.getHost() + " -d " + collection.getDatabaseFinal() + " -c " + collection.getNameFinal() + " --archive=" + collection.getNameFinal() + ".bson";
+        if(clientTo.getPassword() != null && clientTo.getUsername() != null && clientTo.getAuthDb() != null){
+            if(!clientTo.getPassword().isEmpty() && !clientTo.getUsername().isEmpty() && !clientTo.getAuthDb().isEmpty()){
+                command += " -u " + clientTo.getUsername() + " -p " + clientTo.getPassword() + " --authenticationDatabase " + clientTo.getAuthDb();
+            }
+        }
         ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
         processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
         Process process;
