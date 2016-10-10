@@ -19,8 +19,8 @@ import java.util.logging.Logger;
 
 public class Controller {
 
-    public static final String CONFIG_DIRECTORY = "/home/pablo/Descargas/Insertar a mongo/";
-    public static final String WORKING_DIRECTORY = "/home/pablo/Descargas/Insertar a mongo/";
+    public static String CONFIG_DIRECTORY = "/home/pablo/Descargas/Insertar a mongo/";
+    public static String WORKING_DIRECTORY = "/home/pablo/Descargas/Insertar a mongo/";
 
     private static final int concurrentThreads = 1;
     private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
@@ -30,7 +30,7 @@ public class Controller {
     private static Config getConfig(File configurationFile) {
         URL resource = null;
         try {
-            resource = new URL("file://" + new File(WORKING_DIRECTORY + "config.json").getAbsolutePath());
+            resource = new URL("file://" + new File(CONFIG_DIRECTORY + "config.json").getAbsolutePath());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -67,6 +67,7 @@ public class Controller {
                 Config config = getConfig(configurationFile);
                 String msg = "Colecciones a actualizar : " + config.getCollections().length;
                 logger.logMessage(msg, SyncLogger.ANSI_WHITE, true);
+                logger.logMessage("Diferencia máxima para dump/restore : " + config.getParameters().getMaxDiff() + ".", "", true);
                 executorService = Executors.newFixedThreadPool(config.getCollections().length, ThreadsFactory.getInstance());
                 ArrayList<Task> tasks = new ArrayList<>();
                 Arrays.stream(config.getCollections()).forEach(collection -> tasks.add(new Task(config.getMongoFrom(), config.getMongoTo(), collection, config.getParameters().getMaxDiff())));
