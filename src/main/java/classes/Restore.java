@@ -14,13 +14,15 @@ public class Restore extends Thread {
 
     private Client clientTo;
     private Collection collection;
-    private SyncLogger logger = new SyncLogger();
+    private Parameters parameters;
+    private SyncLogger syncLogger = SyncLogger.getInstance();
 
     public Restore(){}
 
-    public Restore(Client to, Collection collection){
+    public Restore(Client to, Collection collection, Parameters parameters){
         this.clientTo = to;
         this.collection = collection;
+        this.parameters = parameters;
     }
 
     public Client getClientTo() {
@@ -48,13 +50,13 @@ public class Restore extends Thread {
             }
         }
         ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
-        processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
+        processBuilder.directory(new File(parameters.getWorkingDirectory()));
         Process process;
         try {
             process = processBuilder.start();
             while(process.isAlive()){
                 BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                in.lines().forEach(line -> logger.logMessage("ID THREAD RESTORE : " + Thread.currentThread().getId() + " : " + line , SyncLogger.ANSI_GREEN, false));
+                in.lines().forEach(line -> syncLogger.logMessage("ID THREAD RESTORE : " + Thread.currentThread().getId() + " : " + line , SyncLogger.ANSI_GREEN, false));
                 Thread.sleep(process.waitFor());
             }
         } catch (IOException | InterruptedException e) {

@@ -1,13 +1,6 @@
 package model;
 
-import classes.Client;
-import classes.Collection;
-import classes.Dump;
-import classes.Index;
-import classes.IndexField;
-import classes.PylonHammer;
-import classes.Query;
-import classes.Restore;
+import classes.*;
 import factories.ThreadsFactory;
 
 import java.io.BufferedReader;
@@ -24,13 +17,15 @@ public class Task extends Thread {
     private Client clientFrom;
     private Client clientTo;
     private Collection collection;
+    private Parameters parameters;
     private ExecutorService executorService;
     private int maxDiff;
 
-    public Task(Client clientFrom, Client clientTo, Collection collection, int maxDiff) {
+    public Task(Client clientFrom, Client clientTo, Collection collection, Parameters parameters, int maxDiff) {
         this.clientFrom = clientFrom;
         this.clientTo = clientTo;
         this.collection = collection;
+        this.parameters = parameters;
         this.maxDiff = maxDiff;
     }
 
@@ -80,8 +75,8 @@ public class Task extends Thread {
         }
         if (collection.getDiff() < maxDiff) {
             ArrayList<Thread> threadList = new ArrayList<>();
-            threadList.add(new Dump(clientFrom, clientTo, collection));
-            threadList.add(new Restore(clientTo, collection));
+            threadList.add(new Dump(clientFrom, clientTo, collection, parameters));
+            threadList.add(new Restore(clientTo, collection, parameters));
             threadList.forEach(Thread::run);
         } else {
             ArrayList<Thread> threadList = new ArrayList<>();

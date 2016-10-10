@@ -15,15 +15,17 @@ public class Dump extends Thread {
     private Client clientFrom;
     private Client clientTo;
     private Collection collection;
+    private Parameters parameters;
 
-    private SyncLogger logger = new SyncLogger();
+    private SyncLogger syncLogger = SyncLogger.getInstance();
 
     public Dump(){}
 
-    public Dump(Client from, Client to, Collection collection){
+    public Dump(Client from, Client to, Collection collection, Parameters parameters){
         this.clientFrom = from;
         this.clientTo = to;
         this.collection = collection;
+        this.parameters = parameters;
     }
 
     public Client getClientFrom() {
@@ -59,13 +61,13 @@ public class Dump extends Thread {
             }
         }
         ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
-        processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
+        processBuilder.directory(new File(parameters.getWorkingDirectory()));
         Process process;
         try {
             process = processBuilder.start();
             while(process.isAlive()){
                 BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                in.lines().forEach(line -> logger.logMessage("ID THREAD RESTORE : " + Thread.currentThread().getId() + " : " + line , SyncLogger.ANSI_BLUE, false));
+                in.lines().forEach(line -> syncLogger.logMessage("ID THREAD RESTORE : " + Thread.currentThread().getId() + " : " + line , SyncLogger.ANSI_BLUE, false));
                 Thread.sleep(process.waitFor());
             }
         } catch (IOException | InterruptedException e) {

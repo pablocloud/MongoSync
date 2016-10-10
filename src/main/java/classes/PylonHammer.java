@@ -32,7 +32,7 @@ public class PylonHammer extends Thread {
     MongoCollection<Document> mongoCollection1;
     private int maxDiff;
 
-    private SyncLogger logger = new SyncLogger();
+    private SyncLogger syncLogger = SyncLogger.getInstance();
 
     /**
      * Main constructor.
@@ -51,7 +51,7 @@ public class PylonHammer extends Thread {
 
     @Override
     public void run() {
-        logger.logMessage("ID THREAD PYLON   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "       " + collection.getNameFinal(), SyncLogger.ANSI_CYAN, false);
+        syncLogger.logMessage("ID THREAD PYLON   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "       " + collection.getNameFinal(), SyncLogger.ANSI_CYAN, false);
         connection = new Connection();
         mongoClient = connection.getConnection(clientFrom);
         mongoClient1 = connection.getConnection(clientTo);
@@ -65,6 +65,6 @@ public class PylonHammer extends Thread {
         }
         mongoClient1.close();
         mongoClient.close();
-        logger.logMessage("ID THREAD PYLON   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "       " + collection.getNameFinal() + " finished", SyncLogger.ANSI_CYAN, false);
+        syncLogger.logMessage("ID THREAD PYLON   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "       " + collection.getNameFinal() + " finished", SyncLogger.ANSI_CYAN, false);
     }
 }
