@@ -15,15 +15,17 @@ public class Dump extends Thread {
     private Client clientFrom;
     private Client clientTo;
     private Collection collection;
+    private Parameters parameters;
 
     private SyncLogger logger = new SyncLogger();
 
     public Dump(){}
 
-    public Dump(Client from, Client to, Collection collection){
+    public Dump(Client from, Client to, Collection collection, Parameters parameters){
         this.clientFrom = from;
         this.clientTo = to;
         this.collection = collection;
+        this.parameters = parameters;
     }
 
     public Client getClientFrom() {
@@ -54,7 +56,7 @@ public class Dump extends Thread {
     public void run() {
         String command = "mongodump -h " + clientFrom.getHost() + " -d '" + collection.getDatabaseOrigin() + "' -c '" + collection.getNameFinal() + "' -q '{$and : [{_id : {$gt : ObjectId(\"" + collection.getResultFrom() + "\") }}, {_id : {$lte : ObjectId(\"" + collection.getResultTo() + "\") }}]}' --archive=" + collection.getNameFinal() + ".bson";
         ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
-        processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
+        processBuilder.directory(new File(parameters.getWorkingDirectory()));
         Process process;
         try {
             process = processBuilder.start();
