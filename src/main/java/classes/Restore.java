@@ -15,7 +15,7 @@ public class Restore extends Thread {
     private Client clientTo;
     private Collection collection;
     private Parameters parameters;
-    private SyncLogger syncLogger;
+    private SyncLogger syncLogger = SyncLogger.getInstance();
 
     public Restore(){}
 

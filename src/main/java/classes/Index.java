@@ -16,7 +16,7 @@ public class Index extends Thread {
     private Client client;
     private Collection collection;
     private IndexField index;
-    private SyncLogger syncLogger;
+    private SyncLogger syncLogger = SyncLogger.getInstance();
 
     public Index (Client client, Collection collection, IndexField index){
         this.client = client;

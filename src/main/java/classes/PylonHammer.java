@@ -32,7 +32,7 @@ public class PylonHammer extends Thread {
     MongoCollection<Document> mongoCollection1;
     private int maxDiff;
 
-    private SyncLogger syncLogger;
+    private SyncLogger syncLogger = SyncLogger.getInstance();
 
     /**
      * Main constructor.

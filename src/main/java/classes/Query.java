@@ -39,7 +39,7 @@ public class Query extends Thread {
     private Object idTo;
     private int count;
 
-    private SyncLogger syncLogger;
+    private SyncLogger syncLogger = SyncLogger.getInstance();
 
     /**
      * Main constructor.

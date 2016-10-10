@@ -17,7 +17,7 @@ public class Dump extends Thread {
     private Collection collection;
     private Parameters parameters;
 
-    private SyncLogger syncLogger;
+    private SyncLogger syncLogger = SyncLogger.getInstance();
 
     public Dump(){}
 
