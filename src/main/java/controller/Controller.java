@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 public class Controller {
 
     public static String CONFIG_DIRECTORY = "/home/pablo/Descargas/Insertar a mongo/";
-    public static String WORKING_DIRECTORY = "/home/pablo/Descargas/Insertar a mongo/";
+    public static String WORKING_DIRECTORY;
 
     private static final int concurrentThreads = 1;
     private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
@@ -65,6 +65,7 @@ public class Controller {
             //noinspection InfiniteLoopStatement
             while (true) {
                 Config config = getConfig(configurationFile);
+                WORKING_DIRECTORY = config.getParameters().getWorkingDirectory();
                 String msg = "Colecciones a actualizar : " + config.getCollections().length;
                 logger.logMessage(msg, SyncLogger.ANSI_WHITE, true);
                 logger.logMessage("Diferencia máxima para dump/restore : " + config.getParameters().getMaxDiff() + ".", "", true);
