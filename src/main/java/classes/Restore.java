@@ -14,13 +14,15 @@ public class Restore extends Thread {
 
     private Client clientTo;
     private Collection collection;
+    private Parameters parameters;
     private SyncLogger logger = new SyncLogger();
 
     public Restore(){}
 
-    public Restore(Client to, Collection collection){
+    public Restore(Client to, Collection collection, Parameters parameters){
         this.clientTo = to;
         this.collection = collection;
+        this.parameters = parameters;
     }
 
     public Client getClientTo() {
@@ -43,7 +45,7 @@ public class Restore extends Thread {
     public void run() {
         String command = "mongorestore -h " + clientTo.getHost() + " -u " + clientTo.getUsername() + " -p " + clientTo.getPassword() + " --authenticationDatabase " + clientTo.getAuthDb() + " -d " + collection.getDatabaseFinal() + " -c " + collection.getNameFinal() + " --archive=" + collection.getNameFinal() + ".bson";
         ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
-        processBuilder.directory(new File("/home/pablo/Descargas/Insertar a mongo/"));
+        processBuilder.directory(new File(parameters.getWorkingDirectory()));
         Process process;
         try {
             process = processBuilder.start();
