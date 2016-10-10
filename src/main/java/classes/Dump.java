@@ -55,9 +55,9 @@ public class Dump extends Thread {
     @Override
     public void run() {
         String command = "mongodump -h " + clientFrom.getHost() + " -d '" + collection.getDatabaseOrigin() + "' -c '" + collection.getNameFinal() + "' -q '{$and : [{_id : {$gt : ObjectId(\"" + collection.getResultFrom() + "\") }}, {_id : {$lte : ObjectId(\"" + collection.getResultTo() + "\") }}]}'";
-        if(clientFrom.getPassword() != null && clientFrom.getUsername() != null && clientFrom.getAuthDb() != null){
-            if(!clientFrom.getPassword().isEmpty() && !clientFrom.getUsername().isEmpty() && !clientFrom.getAuthDb().isEmpty()){
-                command += " -u " + clientFrom.getUsername() + " -p " + clientFrom.getPassword() + " --authenticationDatabase " + clientFrom.getAuthDb() + "";
+        if(clientFrom.getPassword() != null && clientFrom.getUsername() != null && clientFrom.getAuthDB() != null){
+            if(!clientFrom.getPassword().isEmpty() && !clientFrom.getUsername().isEmpty() && !clientFrom.getAuthDB().isEmpty()){
+                command += " -u " + clientFrom.getUsername() + " -p " + clientFrom.getPassword() + " --authenticationDatabase " + clientFrom.getAuthDB() + "";
             }
         }
         command += " --archive=" + collection.getNameFinal() + ".bson";

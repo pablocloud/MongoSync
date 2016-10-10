@@ -14,19 +14,19 @@ public class Client implements Serializable {
     private String username;
     @SerializedName("password")
     private String password;
-    @SerializedName("authDb")
-    private String authDb;
+    @SerializedName("authDB")
+    private String authDB;
 
     public Client() {
 
     }
 
-    public Client(String host, String port, String username, String password, String authDb) {
+    public Client(String host, String port, String username, String password, String authDB) {
         this.host = host;
         this.port = port;
         this.username = username;
         this.password = password;
-        this.authDb = authDb;
+        this.authDB = authDB;
     }
 
     public String getHost() {
@@ -61,12 +61,12 @@ public class Client implements Serializable {
         this.password = password;
     }
 
-    public String getAuthDb() {
-        return authDb;
+    public String getAuthDB() {
+        return authDB;
     }
 
-    public void setAuthDb(String authDb) {
-        this.authDb = authDb;
+    public void setAuthDB(String authDB) {
+        this.authDB = authDB;
     }
 
 }
