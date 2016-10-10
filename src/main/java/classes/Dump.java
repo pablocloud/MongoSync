@@ -54,12 +54,13 @@ public class Dump extends Thread {
 
     @Override
     public void run() {
-        String command = "mongodump -h " + clientFrom.getHost() + " -d '" + collection.getDatabaseOrigin() + "' -c '" + collection.getNameFinal() + "' -q '{$and : [{_id : {$gt : ObjectId(\"" + collection.getResultFrom() + "\") }}, {_id : {$lte : ObjectId(\"" + collection.getResultTo() + "\") }}]}' --archive=" + collection.getNameFinal() + ".bson";
+        String command = "mongodump -h " + clientFrom.getHost() + " -d '" + collection.getDatabaseOrigin() + "' -c '" + collection.getNameFinal() + "' -q '{$and : [{_id : {$gt : ObjectId(\"" + collection.getResultFrom() + "\") }}, {_id : {$lte : ObjectId(\"" + collection.getResultTo() + "\") }}]}'";
         if(clientFrom.getPassword() != null && clientFrom.getUsername() != null && clientFrom.getAuthDb() != null){
             if(!clientFrom.getPassword().isEmpty() && !clientFrom.getUsername().isEmpty() && !clientFrom.getAuthDb().isEmpty()){
-                command.concat(" -u " + clientFrom.getUsername() + " -p " + clientFrom.getPassword() + " --authenticationDatabase " + clientFrom.getAuthDb() + "");
+                command += " -u " + clientFrom.getUsername() + " -p " + clientFrom.getPassword() + " --authenticationDatabase " + clientFrom.getAuthDb() + "";
             }
         }
+        command += " --archive=" + collection.getNameFinal() + ".bson";
         ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
         processBuilder.directory(new File(parameters.getWorkingDirectory()));
         Process process;
@@ -67,7 +68,7 @@ public class Dump extends Thread {
             process = processBuilder.start();
             while(process.isAlive()){
                 BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                in.lines().forEach(line -> syncLogger.logMessage("ID THREAD RESTORE : " + Thread.currentThread().getId() + " : " + line , SyncLogger.ANSI_BLUE, false));
+                in.lines().forEach(line -> syncLogger.logMessage("ID THREAD DUMP    : " + Thread.currentThread().getId() + " : " + line , SyncLogger.ANSI_BLUE, false));
                 Thread.sleep(process.waitFor());
             }
         } catch (IOException | InterruptedException e) {
