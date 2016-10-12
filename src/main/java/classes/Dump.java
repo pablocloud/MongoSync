@@ -16,7 +16,6 @@ public class Dump extends Thread {
     private Client clientTo;
     private Collection collection;
     private Parameters parameters;
-
     private SyncLogger syncLogger = SyncLogger.getInstance();
 
     public Dump(){}

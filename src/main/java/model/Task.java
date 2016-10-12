@@ -107,6 +107,7 @@ public class Task extends Thread {
                 threadList.add(new PylonHammer(getClientFrom(), getClientTo(), getCollection(), maxDiff));
                 threadList.forEach(Thread::run);
             }
+            // TODO: if the index exist don't call the Index class or chose the right index to build
             if(this.collection.getIndexes() != null){
                 for(IndexField indexField : this.collection.getIndexes()){
                     new Index(clientTo, this.collection, indexField).run();
