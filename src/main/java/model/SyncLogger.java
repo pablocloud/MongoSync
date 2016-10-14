@@ -65,7 +65,7 @@ public class SyncLogger {
      * @param message String
      */
     private void slackLog(String message) {
-        processBuilder = new ProcessBuilder("/bin/bash", "-c", "curl -X POST --data-urlencode 'payload={\"text\" : \"" + message + "\", \"channel\" : \"#monguitotrace\"}' https://hooks.slack.com/services/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");
+        processBuilder = new ProcessBuilder("/bin/bash", "-c", "curl -X POST --data-urlencode 'payload={\"username\": \"mongosync-menorca\",\"icon_emoji\": \":goku:\",\"text\" : \"" + message + "\", \"channel\" : \"#monguitotrace\"}' https://hooks.slack.com/services/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");
         processBuilder.directory(new File(parameters.getWorkingDirectory()));
         process = null;
         try {

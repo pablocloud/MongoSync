@@ -75,14 +75,19 @@ public class Query extends Thread {
         if (count == -1) {
             count = 0;
         }
+        mongoClient.close();
         collection.setDiff(count);
         collection.setResultFrom(idFrom);
         collection.setResultTo(idTo);
         String collectionStr = collection.getNameFinal();
-        while(collectionStr.length() < 50){
+        while (collectionStr.length() < 50) {
             collectionStr = collectionStr + " ";
         }
-        String curl = collectionStr + "La diferencia es de : " + (count) + " documentos.";
-        syncLogger.logMessage(curl, SyncLogger.ANSI_WHITE, true);
+        String curl = collectionStr + "La diferencia es de : " + (count) + " documentos. " + clientFrom.getHost() + " -> " + clientTo.getHost() + ".";
+        if (count != 0) {
+            syncLogger.logMessage(curl, SyncLogger.ANSI_WHITE, true);
+        } else {
+            syncLogger.logMessage(curl, SyncLogger.ANSI_WHITE, false);
+        }
     }
 }

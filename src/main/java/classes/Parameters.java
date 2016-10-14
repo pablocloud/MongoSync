@@ -4,9 +4,6 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
-/**
- * Created by pablo on 3/10/16.
- */
 public class Parameters implements Serializable{
 
     @SerializedName("maxDiff")

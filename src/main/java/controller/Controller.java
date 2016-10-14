@@ -3,7 +3,9 @@ package controller;
 import classes.Config;
 import classes.Parameters;
 import com.google.gson.Gson;
+import com.jcraft.jsch.ChannelSftp;
 import factories.ThreadsFactory;
+import model.Ssh;
 import model.SyncLogger;
 import model.Task;
 
@@ -22,6 +24,13 @@ public class Controller {
     private static String WORKING_DIRECTORY;
     private static final int concurrentThreads = 1;
     private static SyncLogger syncLogger;
+
+    private final static String CONFIG = "mongosync.json";
+
+    private final static String SSH_HOST = "";
+    private final static String SSH_USERNAME = "";
+    private final static String SSH_PASSWORD = "";
+
 
     private static Config getConfig(File configurationFile) {
         URL resource = null;
@@ -53,14 +62,17 @@ public class Controller {
             ExecutorService executorService;
             // noinspection InfiniteLoopStatement
             while (true) {
-                Config config = getConfig(new File(args[0]));
+                Ssh ssh = new Ssh();
+                ChannelSftp sftp = ssh.Connect(SSH_HOST, SSH_USERNAME, SSH_PASSWORD);
+                Config config = new Gson().fromJson(new InputStreamReader(sftp.get(CONFIG)), Config.class);
+                sftp.disconnect();
                 Parameters parameters = config.getParameters();
                 syncLogger.setParameters(parameters);
                 WORKING_DIRECTORY = config.getParameters().getWorkingDirectory();
                 String msg = "Colecciones a actualizar : " + config.getCollections().length;
-                syncLogger.logMessage(msg, SyncLogger.ANSI_WHITE, true);
+                syncLogger.logMessage(msg, SyncLogger.ANSI_WHITE, false);
                 syncLogger.logMessage("Diferencia máxima para dump/restore : " + config.getParameters().getMaxDiff() + ".",
-                        "", true);
+                        "", false);
                 executorService = Executors.newFixedThreadPool(config.getCollections().length,
                         ThreadsFactory.getInstance());
                 ArrayList<Task> tasks = new ArrayList<>();
@@ -70,12 +82,10 @@ public class Controller {
                 tasks.forEach(executorService::execute);
                 executorService.shutdown();
                 executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-                msg = "-";
-                while (msg.length() < 100) {
-                    msg = msg + "-";
-                }
-                syncLogger.logMessage(msg, SyncLogger.ANSI_WHITE, true);
+                for(msg = "-"; msg.length() < 100; msg = msg + "-");
+                syncLogger.logMessage(msg, SyncLogger.ANSI_WHITE, false);
                 Thread.sleep(1000);
+                System.gc();
             }
         } catch (Exception e) {
             String curl = e.getMessage();
