@@ -6,9 +6,15 @@ import com.mongodb.MongoClientURI;
 
 import java.util.Objects;
 
-public class Connection {
+public class Connection  {
 
     private Client client;
+
+    private static Connection instance;
+
+    private Connection(){}
+
+    public static Connection getInstance(){return (instance == null) ? new Connection() : instance;}
 
     /**
      * Returns a MongoClient with the config data from Client.
