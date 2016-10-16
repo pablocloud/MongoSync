@@ -45,7 +45,4 @@ public interface Synchronization {
 
     public Index getIndex();
 
-
-
-
 }

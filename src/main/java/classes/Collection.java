@@ -19,11 +19,13 @@ public class Collection implements Serializable {
     private String fieldOrigin;
     @SerializedName("fieldFinal")
     private String fieldFinal;
+    @SerializedName("indexes")
+    private IndexField[] indexes;
+
     private Object resultFrom;
     private Object resultTo;
     private int diff;
-    @SerializedName("indexes")
-    private IndexField[] indexes;
+
 
     public Collection() {
 

@@ -11,6 +11,8 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by pablo on 30/09/16.
@@ -59,10 +61,10 @@ public class PylonHammer extends Thread {
         mongoCollection = mongoDatabase.getCollection(collection.getNameFinal());
         mongoDatabase1 = mongoClient1.getDatabase(collection.getDatabaseFinal());
         mongoCollection1 = mongoDatabase1.getCollection(collection.getNameFinal());
-        FindIterable<Document> limit = mongoCollection.find(new BasicDBObject("_id", new BasicDBObject("$gt", new ObjectId("" + collection.getResultFrom() + "")))).sort(new BasicDBObject("_id", 1)).limit(maxDiff);
-        for (Document doc : limit) {
-            mongoCollection1.insertOne(doc);
-        }
+        FindIterable<Document> documentFindIterable = mongoCollection.find(new BasicDBObject("_id", new BasicDBObject("$gt", new ObjectId("" + collection.getResultFrom() + "")))).sort(new BasicDBObject("_id", 1)).limit(maxDiff);
+        List<Document> documents = new ArrayList<>();
+        documentFindIterable.iterator().forEachRemaining(documents::add);
+        mongoCollection1.insertMany(documents);
         mongoClient1.close();
         mongoClient.close();
         syncLogger.logMessage("ID THREAD PYLON   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "       " + collection.getNameFinal() + " finished", SyncLogger.ANSI_CYAN, false);
