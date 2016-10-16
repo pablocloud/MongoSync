@@ -3,7 +3,9 @@ package controller;
 import classes.Config;
 import classes.Parameters;
 import com.google.gson.Gson;
+import com.mongodb.MongoClient;
 import factories.ThreadsFactory;
+import model.Connection;
 import model.SyncLogger;
 import model.Task;
 
@@ -55,6 +57,13 @@ public class Controller {
             while (true) {
                 Config config = getConfig(new File(args[0]));
                 Parameters parameters = config.getParameters();
+                //TODO: Create connection instance here.
+                Connection connection = Connection.getInstance();
+
+                //TODO: build mongoClients here, and use it in all transactions
+                MongoClient from = connection.getConnection(config.getMongoFrom());
+                MongoClient to = connection.getConnection(config.getMongoTo());
+
                 syncLogger.setParameters(parameters);
                 WORKING_DIRECTORY = config.getParameters().getWorkingDirectory();
                 String msg = "Colecciones a actualizar : " + config.getCollections().length;
@@ -64,9 +73,12 @@ public class Controller {
                 executorService = Executors.newFixedThreadPool(config.getCollections().length,
                         ThreadsFactory.getInstance());
                 ArrayList<Task> tasks = new ArrayList<>();
-                Arrays.stream(config.getCollections()).forEach(
+/*                Arrays.stream(config.getCollections()).forEach(
                         collection -> tasks.add(new Task(config.getMongoFrom(), config.getMongoTo(), collection,
-                                parameters, config.getParameters().getMaxDiff())));
+                                parameters, config.getParameters().getMaxDiff())));*/
+
+                Arrays.stream(config.getCollections()).forEach(collection -> tasks.add(new Task(from, to, collection, parameters, config.getParameters().getMaxDiff())));
+
                 tasks.forEach(executorService::execute);
                 executorService.shutdown();
                 executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
