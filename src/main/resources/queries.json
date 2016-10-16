@@ -1,0 +1,26 @@
+BSON{
+  "$and": ArrayList[
+    {
+      "_id": {
+        "$gt": "ObjectId()"
+      }
+    },
+    {
+      "_id": {
+        "$lte": "ObjectId()"
+      }
+    }
+  ]
+},
+{
+$and:
+[
+{"_id": {
+$gt: ObjectId("57ef775be4b0623a5ef0330c")
+}},
+{"_id": {
+$lte: ObjectId("57ef7967e4b0b5f19851088f")
+}
+}
+]
+}

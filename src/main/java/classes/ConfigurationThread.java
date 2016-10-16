@@ -1,5 +1,7 @@
 package classes;
 
+import model.Connection;
+
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -7,6 +9,8 @@ import java.util.concurrent.ExecutorService;
  */
 public class ConfigurationThread {
     private ExecutorService executorService;
+    private Connection connection;
+
 
     public ExecutorService getExecutorService() {
         return executorService;
@@ -14,5 +18,13 @@ public class ConfigurationThread {
 
     public void setExecutorService(ExecutorService executorService) {
         this.executorService = executorService;
+    }
+
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
     }
 }
