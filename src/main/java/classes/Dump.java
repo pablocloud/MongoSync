@@ -1,11 +1,23 @@
 package classes;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import model.Connection;
 import model.SyncLogger;
+import org.bson.BSON;
+import org.bson.Document;
+import org.bson.types.ObjectId;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.*;
+
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.gt;
+import static com.mongodb.client.model.Filters.lte;
 
 /**
  * Created by eduardo on 23/09/16.
@@ -53,6 +65,58 @@ public class Dump extends Thread {
 
     @Override
     public void run() {
+
+/*
+        //connection
+        Connection connection = new Connection();
+        MongoClient mongoClient = connection.getConnection(clientFrom);
+        MongoDatabase mongoDatabase = mongoClient.getDatabase(collection.getDatabaseOrigin());
+        MongoCollection mongoCollection = mongoDatabase.getCollection(collection.getNameOrigin());
+
+        //connection to
+        Connection connection1 = new Connection();
+        MongoClient mongoClient1 = connection1.getConnection(clientTo);
+        MongoDatabase mongoDatabase1 = mongoClient1.getDatabase(collection.getDatabaseFinal());
+        MongoCollection mongoCollection1 = mongoDatabase1.getCollection(collection.getNameFinal());
+
+        //query
+        List<BasicDBObject> basicDBObjects = new ArrayList<>();
+        basicDBObjects.add(new BasicDBObject("_id", new BasicDBObject("$gt", new ObjectId(this.collection.getResultFrom().toString()))));
+        basicDBObjects.add(new BasicDBObject("_id", new BasicDBObject("$lte", new ObjectId(this.collection.getResultTo().toString()))));
+        BasicDBObject and = new BasicDBObject("$and", basicDBObjects);
+
+
+        //resultSet
+        FindIterable<Document> findIterable = mongoCollection.find(and);
+        List<Document> documents = new ArrayList<>();
+        for (Document document : findIterable){documents.add(document);}
+
+        mongoCollection1.insertMany(documents);
+*/
+
+        //TODO: make dump process
+/*
+        File out = new File(parameters.getWorkingDirectory() + collection.getNameFinal() + ".bson");
+        try {
+            FileWriter fileWriter = new FileWriter(out);
+
+            for(Document document : findIterable){
+                System.out.println(document);
+                fileWriter.write(document.toJson());
+            }
+            fileWriter.flush();
+
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+*/
+
+
+
+
+        //Old way
         String command = "mongodump -h " + clientFrom.getHost() + " -d '" + collection.getDatabaseOrigin() + "' -c '" + collection.getNameFinal() + "' -q '{$and : [{_id : {$gt : ObjectId(\"" + collection.getResultFrom() + "\") }}, {_id : {$lte : ObjectId(\"" + collection.getResultTo() + "\") }}]}'";
         if(clientFrom.getPassword() != null && clientFrom.getUsername() != null && clientFrom.getAuthDB() != null){
             if(!clientFrom.getPassword().isEmpty() && !clientFrom.getUsername().isEmpty() && !clientFrom.getAuthDB().isEmpty()){
