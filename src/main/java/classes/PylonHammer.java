@@ -34,6 +34,9 @@ public class PylonHammer extends Thread {
     MongoCollection<Document> mongoCollection1;
     private int maxDiff;
 
+    private MongoClient from;
+    private MongoClient to;
+
     private SyncLogger syncLogger = SyncLogger.getInstance();
 
     /**
@@ -51,10 +54,16 @@ public class PylonHammer extends Thread {
         this.maxDiff = maxDiff;
     }
 
-    @Override
-    public void run() {
+    public PylonHammer(MongoClient from, MongoClient to, Collection collection, int maxDiff){
+        this.from = from;
+        this.to = to;
+        this.collection = collection;
+        this.maxDiff = maxDiff;
+    }
+
+    public void oldWay(){
         syncLogger.logMessage("ID THREAD PYLON   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "       " + collection.getNameFinal(), SyncLogger.ANSI_CYAN, false);
-        connection = new Connection();
+        connection = Connection.getInstance();
         mongoClient = connection.getConnection(clientFrom);
         mongoClient1 = connection.getConnection(clientTo);
         mongoDatabase = mongoClient.getDatabase(collection.getDatabaseFinal());
@@ -67,6 +76,20 @@ public class PylonHammer extends Thread {
         mongoCollection1.insertMany(documents);
         mongoClient1.close();
         mongoClient.close();
+        syncLogger.logMessage("ID THREAD PYLON   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "       " + collection.getNameFinal() + " finished", SyncLogger.ANSI_CYAN, false);
+    }
+
+    @Override
+    public void run() {
+        syncLogger.logMessage("ID THREAD PYLON   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "       " + collection.getNameFinal(), SyncLogger.ANSI_CYAN, false);
+        mongoDatabase = from.getDatabase(collection.getDatabaseFinal());
+        mongoCollection = mongoDatabase.getCollection(collection.getNameFinal());
+        mongoDatabase1 = to.getDatabase(collection.getDatabaseFinal());
+        mongoCollection1 = mongoDatabase1.getCollection(collection.getNameFinal());
+        FindIterable<Document> documentFindIterable = mongoCollection.find(new BasicDBObject("_id", new BasicDBObject("$gt", new ObjectId("" + collection.getResultFrom() + "")))).sort(new BasicDBObject("_id", 1)).limit(maxDiff);
+        List<Document> documents = new ArrayList<>();
+        documentFindIterable.iterator().forEachRemaining(documents::add);
+        mongoCollection1.insertMany(documents);
         syncLogger.logMessage("ID THREAD PYLON   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "       " + collection.getNameFinal() + " finished", SyncLogger.ANSI_CYAN, false);
     }
 }

@@ -2,6 +2,7 @@ package model;
 
 import classes.*;
 import com.mongodb.BasicDBObject;
+import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -21,10 +22,23 @@ public class Task extends Thread {
     private Parameters parameters;
     private ExecutorService executorService;
     private int maxDiff;
+    private MongoClient from;
+    private MongoClient to;
+
+    public Task() {
+    }
 
     public Task(Client clientFrom, Client clientTo, Collection collection, Parameters parameters, int maxDiff) {
         this.clientFrom = clientFrom;
         this.clientTo = clientTo;
+        this.collection = collection;
+        this.parameters = parameters;
+        this.maxDiff = maxDiff;
+    }
+
+    public Task(MongoClient from, MongoClient to, Collection collection, Parameters parameters, int maxDiff) {
+        this.from = from;
+        this.to = to;
         this.collection = collection;
         this.parameters = parameters;
         this.maxDiff = maxDiff;
@@ -62,24 +76,28 @@ public class Task extends Thread {
         this.executorService = executorService;
     }
 
-    @Override
-    public void run() {
+    public void oldWay(){
         ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadsFactory.getInstance());
-        MongoClient mongoClientFinal = new Connection().getConnection(clientTo);
+        // Check is collection exist
+        MongoClient mongoClientFinal = Connection.getInstance().getConnection(clientTo);
         MongoDatabase database = mongoClientFinal.getDatabase(collection.getDatabaseFinal());
         MongoIterable<String> strings = database.listCollectionNames();
         boolean exist = false;
-        for(String col : strings){
-            if(col.equals(collection.getNameFinal())){
+        for (String col : strings) {
+            if (col.equals(collection.getNameFinal())) {
                 exist = true;
             }
         }
-        if(!exist){
+        // Case false create it
+        if (!exist) {
             database.createCollection(collection.getNameFinal());
         }
+
+        // Get records
         MongoCollection<Document> collectionResult = database.getCollection(this.collection.getNameFinal());
-        if(collectionResult.count() <= 0){
-            MongoClient mongoClientOrigin = new Connection().getConnection(clientFrom);
+        // If no records inject the first
+        if (collectionResult.count() <= 0) {
+            MongoClient mongoClientOrigin = Connection.getInstance().getConnection(clientFrom);
             MongoDatabase databaseOrigin = mongoClientOrigin.getDatabase(collection.getDatabaseOrigin());
             MongoCollection<Document> collectionOrigin = databaseOrigin.getCollection(this.collection.getNameOrigin());
             Document id = collectionOrigin.find().sort(new BasicDBObject("_id", 1)).limit(1).first();
@@ -96,7 +114,7 @@ public class Task extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if(this.collection.getDiff() > 0){
+        if (this.collection.getDiff() > 0) {
             if (this.collection.getDiff() < maxDiff) {
                 ArrayList<Thread> threadList = new ArrayList<>();
                 threadList.add(new Dump(clientFrom, clientTo, this.collection, parameters));
@@ -108,8 +126,65 @@ public class Task extends Thread {
                 threadList.forEach(Thread::run);
             }
             // TODO: if the index exist don't call the Index class or chose the right index to build
-            if(this.collection.getIndexes() != null){
-                for(IndexField indexField : this.collection.getIndexes()){
+            if (this.collection.getIndexes() != null) {
+                for (IndexField indexField : this.collection.getIndexes()) {
+                    new Index(clientTo, this.collection, indexField).run();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void run() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadsFactory.getInstance());
+        // Check is collection exist
+        MongoDatabase database = to.getDatabase(collection.getDatabaseFinal());
+        MongoIterable<String> strings = database.listCollectionNames();
+        boolean exist = false;
+        for (String col : strings) {
+            if (col.equals(collection.getNameFinal())) {
+                exist = true;
+            }
+        }
+        // Case false create it
+        if (!exist) {
+            database.createCollection(collection.getNameFinal());
+        }
+
+        // Get records
+        MongoCollection<Document> collectionResult = database.getCollection(this.collection.getNameFinal());
+        // If no records inject the first
+        if (collectionResult.count() <= 0) {
+            MongoDatabase databaseOrigin = from.getDatabase(collection.getDatabaseOrigin());
+            MongoCollection<Document> collectionOrigin = databaseOrigin.getCollection(this.collection.getNameOrigin());
+            Document id = collectionOrigin.find().sort(new BasicDBObject("_id", 1)).limit(1).first();
+            collectionResult.insertOne(id);
+//            mongoClientOrigin.close();
+        }
+//        mongoClientFinal.close();
+        try {
+            Query query = new Query(from, to, this.collection);
+            query.run();
+            while (query.isAlive()) {
+                Thread.sleep(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (this.collection.getDiff() > 0) {
+           /* if (this.collection.getDiff() < maxDiff) {
+                ArrayList<Thread> threadList = new ArrayList<>();
+                threadList.add(new Dump(clientFrom, clientTo, this.collection, parameters));
+                threadList.add(new Restore(clientTo, this.collection, parameters));
+                threadList.forEach(Thread::run);
+            } else {*/
+                ArrayList<Thread> threadList = new ArrayList<>();
+                threadList.add(new PylonHammer(from, to, getCollection(), maxDiff));
+                threadList.forEach(Thread::run);
+            //}
+            // TODO: if the index exist don't call the Index class or chose the right index to build
+            if (this.collection.getIndexes() != null) {
+                for (IndexField indexField : this.collection.getIndexes()) {
                     new Index(clientTo, this.collection, indexField).run();
                 }
             }

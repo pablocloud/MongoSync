@@ -35,6 +35,9 @@ public class Query extends Thread {
     MongoCollection<Document> mongoCollection;
     Document first;
 
+    private MongoClient from;
+    private MongoClient to;
+
     private Object idFrom;
     private Object idTo;
     private int count;
@@ -54,9 +57,14 @@ public class Query extends Thread {
         this.collection = collection;
     }
 
-    @Override
-    public void run() {
-        connection = new Connection();
+    public Query (MongoClient from, MongoClient to, Collection collection){
+        this.from = from;
+        this.to = to;
+        this.collection = collection;
+    }
+
+    public void oldWay(){
+        connection = Connection.getInstance();
         database = collection.getDatabaseFinal();
         collectionName = collection.getNameFinal();
         mongoClient = connection.getConnection(clientTo);
@@ -68,6 +76,35 @@ public class Query extends Thread {
         mongoClient.close();
         mongoClient = connection.getConnection(clientFrom);
         mongoDatabase = mongoClient.getDatabase(database);
+        mongoCollection = mongoDatabase.getCollection(collectionName);
+        first = mongoCollection.find().sort(new BasicDBObject("_id", -1)).limit(1).first();
+        idTo = first.get("_id");
+        count = Math.toIntExact(mongoCollection.count(and(gt("_id", new ObjectId(idFrom.toString())), lt("_id", new ObjectId(idTo.toString())))));
+        if (count == -1) {
+            count = 0;
+        }
+        collection.setDiff(count);
+        collection.setResultFrom(idFrom);
+        collection.setResultTo(idTo);
+        String collectionStr = collection.getNameFinal();
+        while(collectionStr.length() < 50){
+            collectionStr = collectionStr + " ";
+        }
+        String curl = collectionStr + "La diferencia es de : " + (count) + " documentos.";
+        syncLogger.logMessage(curl, SyncLogger.ANSI_WHITE, true);
+    }
+
+    @Override
+    public void run() {
+        database = collection.getDatabaseFinal();
+        collectionName = collection.getNameFinal();
+        mongoDatabase = to.getDatabase(database);
+        mongoCollection = mongoDatabase.getCollection(collectionName);
+        first = mongoCollection.find().sort(new BasicDBObject("_id", -1)).limit(1).first();
+        idFrom = first.get("_id");
+        collection.setResultFrom(idFrom);
+//        mongoClient.close();
+        mongoDatabase = from.getDatabase(database);
         mongoCollection = mongoDatabase.getCollection(collectionName);
         first = mongoCollection.find().sort(new BasicDBObject("_id", -1)).limit(1).first();
         idTo = first.get("_id");
