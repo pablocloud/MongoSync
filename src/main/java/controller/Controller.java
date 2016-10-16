@@ -88,6 +88,11 @@ public class Controller {
                 }
                 syncLogger.logMessage(msg, SyncLogger.ANSI_WHITE, true);
                 Thread.sleep(1000);
+
+                //FIXME: close connections
+                from.close();
+                to.close();
+
             }
         } catch (Exception e) {
             String curl = e.getMessage();
