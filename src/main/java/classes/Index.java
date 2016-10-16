@@ -26,7 +26,7 @@ public class Index extends Thread {
 
     @Override
     public void run() {
-        MongoClient mongoClient = new Connection().getConnection(client);
+        MongoClient mongoClient = Connection.getInstance().getConnection(client);
         MongoDatabase database = mongoClient.getDatabase(collection.getDatabaseFinal());
         MongoCollection<Document> collectionDb = database.getCollection(this.collection.getNameFinal());
         syncLogger.logMessage("ID THREAD INDEX   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "     " + collection.getNameFinal(), SyncLogger.ANSI_CYAN, false);
