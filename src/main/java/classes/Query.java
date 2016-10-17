@@ -79,7 +79,7 @@ public class Query extends Thread {
         mongoCollection = mongoDatabase.getCollection(collectionName);
         first = mongoCollection.find().sort(new BasicDBObject("_id", -1)).limit(1).first();
         idTo = first.get("_id");
-        count = Math.toIntExact(mongoCollection.count(and(gt("_id", new ObjectId(idFrom.toString())), lt("_id", new ObjectId(idTo.toString())))));
+        count = Math.toIntExact(mongoCollection.count(and(gt("_id", new ObjectId(idFrom.toString())), lte("_id", new ObjectId(idTo.toString())))));
         if (count == -1) {
             count = 0;
         }

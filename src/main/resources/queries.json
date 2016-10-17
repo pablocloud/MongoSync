@@ -1,26 +1,96 @@
-BSON{
-  "$and": ArrayList[
-    {
-      "_id": {
-        "$gt": "ObjectId()"
-      }
-    },
-    {
-      "_id": {
-        "$lte": "ObjectId()"
-      }
-    }
-  ]
+{
+  "databaseOrigin": "integration-engine_log",
+  "databaseFinal": "integration-engine_log",
+  "nameOrigin": "trace_booking_2015_09",
+  "nameFinal": "trace_booking_2015_09",
+  "fieldOrigin": "_id",
+  "fieldFinal": "_id"
 },
 {
-$and:
-[
-{"_id": {
-$gt: ObjectId("57ef775be4b0623a5ef0330c")
-}},
-{"_id": {
-$lte: ObjectId("57ef7967e4b0b5f19851088f")
-}
-}
-]
+"databaseOrigin": "integration-engine_log",
+"databaseFinal": "integration-engine_log",
+"nameOrigin": "trace_booking_2015_10",
+"nameFinal": "trace_booking_2015_10",
+"fieldOrigin": "_id",
+"fieldFinal": "_id"
+},
+{
+"databaseOrigin": "integration-engine_log",
+"databaseFinal": "integration-engine_log",
+"nameOrigin": "trace_booking_2015_11",
+"nameFinal": "trace_booking_2015_11",
+"fieldOrigin": "_id",
+"fieldFinal": "_id"
+},
+{
+"databaseOrigin": "integration-engine_log",
+"databaseFinal": "integration-engine_log",
+"nameOrigin": "trace_booking_2015_12",
+"nameFinal": "trace_booking_2015_12",
+"fieldOrigin": "_id",
+"fieldFinal": "_id"
+},
+{
+"databaseOrigin": "integration-engine_log",
+"databaseFinal": "integration-engine_log",
+"nameOrigin": "trace_booking_2016_01",
+"nameFinal": "trace_booking_2016_01",
+"fieldOrigin": "_id",
+"fieldFinal": "_id"
+},
+{
+"databaseOrigin": "integration-engine_log",
+"databaseFinal": "integration-engine_log",
+"nameOrigin": "trace_booking_2016_02",
+"nameFinal": "trace_booking_2016_02",
+"fieldOrigin": "_id",
+"fieldFinal": "_id"
+},
+{
+"databaseOrigin": "integration-engine_log",
+"databaseFinal": "integration-engine_log",
+"nameOrigin": "trace_booking_2016_04",
+"nameFinal": "trace_booking_2016_04",
+"fieldOrigin": "_id",
+"fieldFinal": "_id"
+},
+{
+"databaseOrigin": "integration-engine_log",
+"databaseFinal": "integration-engine_log",
+"nameOrigin": "trace_booking_2016_03",
+"nameFinal": "trace_booking_2016_03",
+"fieldOrigin": "_id",
+"fieldFinal": "_id"
+},
+{
+"databaseOrigin": "integration-engine_log",
+"databaseFinal": "integration-engine_log",
+"nameOrigin": "trace_booking_2016_05",
+"nameFinal": "trace_booking_2016_05",
+"fieldOrigin": "_id",
+"fieldFinal": "_id"
+},
+{
+"databaseOrigin": "integration-engine_log",
+"databaseFinal": "integration-engine_log",
+"nameOrigin": "trace_booking_2016_06",
+"nameFinal": "trace_booking_2016_06",
+"fieldOrigin": "_id",
+"fieldFinal": "_id"
+},
+{
+"databaseOrigin": "integration-engine_log",
+"databaseFinal": "integration-engine_log",
+"nameOrigin": "trace_booking_2016_08",
+"nameFinal": "trace_booking_2016_08",
+"fieldOrigin": "_id",
+"fieldFinal": "_id"
+},
+{
+"databaseOrigin": "integration-engine_log",
+"databaseFinal": "integration-engine_log",
+"nameOrigin": "trace_booking_2016_09",
+"nameFinal": "trace_booking_2016_09",
+"fieldOrigin": "_id",
+"fieldFinal": "_id"
 }
