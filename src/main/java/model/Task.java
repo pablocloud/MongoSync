@@ -11,6 +11,7 @@ import factories.ThreadsFactory;
 import org.bson.Document;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -182,11 +183,11 @@ public class Task extends Thread {
                 threadList.add(new PylonHammer(from, to, getCollection(), maxDiff));
                 threadList.forEach(Thread::run);
             //}
-            // TODO: if the index exist don't call the Index class or chose the right index to build
-            if (this.collection.getIndexes() != null) {
-                for (IndexField indexField : this.collection.getIndexes()) {
-                    new Index(clientTo, this.collection, indexField).run();
-                }
+        }
+        // TODO: if the index exist don't call the Index class or chose the right index to build
+        if (this.collection.getIndexes() != null) {
+            for (IndexField indexField : this.collection.getIndexes()) {
+                new Index(to, this.collection, indexField).run();
             }
         }
     }
