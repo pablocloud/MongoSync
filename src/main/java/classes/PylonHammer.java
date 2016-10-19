@@ -7,6 +7,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import model.Connection;
 import model.SyncLogger;
+import org.bson.BsonSerializationException;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
@@ -88,7 +89,13 @@ public class PylonHammer extends Thread {
         mongoCollection1 = mongoDatabase1.getCollection(collection.getNameFinal());
         FindIterable<Document> documentFindIterable = mongoCollection.find(new BasicDBObject("_id", new BasicDBObject("$gt", new ObjectId("" + collection.getResultFrom() + "")))).sort(new BasicDBObject("_id", 1)).limit(maxDiff);
         List<Document> documents = new ArrayList<>();
-        documentFindIterable.iterator().forEachRemaining(documents::add);
+        try {
+            documentFindIterable.iterator().forEachRemaining(documents::add);
+        }
+        catch (BsonSerializationException e){
+            System.err.println(e);
+        }
+
         mongoCollection1.insertMany(documents);
         syncLogger.logMessage("ID THREAD PYLON   : " + String.valueOf(Thread.currentThread().getId()) + " : " + Instant.now().toString() + "       " + collection.getNameFinal() + " finished", SyncLogger.ANSI_CYAN, false);
     }
