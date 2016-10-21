@@ -14,9 +14,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +23,7 @@ public class Controller {
     private static String WORKING_DIRECTORY;
     private static final int concurrentThreads = 1;
     private static SyncLogger syncLogger;
+    private static ExecutorService executorService;
 
     private static Config getConfig(File configurationFile) {
         URL resource = null;
@@ -52,7 +52,6 @@ public class Controller {
         try {
             Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
             mongoLogger.setLevel(Level.SEVERE);
-            ExecutorService executorService;
             // noinspection InfiniteLoopStatement
             while (true) {
                 Config config = getConfig(new File(args[0]));
@@ -72,6 +71,7 @@ public class Controller {
                         "", true);
                 executorService = Executors.newFixedThreadPool(config.getCollections().length,
                         ThreadsFactory.getInstance());
+
                 ArrayList<Task> tasks = new ArrayList<>();
 /*                Arrays.stream(config.getCollections()).forEach(
                         collection -> tasks.add(new Task(config.getMongoFrom(), config.getMongoTo(), collection,
@@ -79,7 +79,27 @@ public class Controller {
 
                 Arrays.stream(config.getCollections()).forEach(collection -> tasks.add(new Task(from, to, collection, parameters, config.getParameters().getMaxDiff())));
 
-                tasks.forEach(executorService::execute);
+//                tasks.forEach(executorService::execute);
+
+                //List<FutureTask<Task>> futureTasks = new ArrayList<>();
+
+                tasks.forEach(task -> {
+                    FutureTask<Task> futureTask = (FutureTask) executorService.submit(task);
+                   // futureTasks.add(futureTask);
+                   // System.out.println(task.getName() + " " + futureTask.isDone());
+                });
+
+
+  /*              futureTasks.forEach(taskFutureTask -> {
+                    System.out.println(taskFutureTask.isDone());
+                });*/
+
+            /*    tasks.forEach(task -> {
+                    System.out.println(task.getExecutorService().);
+                });
+*/
+                System.out.println(tasks.size());
+
                 executorService.shutdown();
                 executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
                 msg = "-";
@@ -87,6 +107,8 @@ public class Controller {
                     msg = msg + "-";
                 }
                 syncLogger.logMessage(msg, SyncLogger.ANSI_WHITE, true);
+
+                // Wait for a set time.
                 Thread.sleep(1000);
 
                 //FIXME: close connections

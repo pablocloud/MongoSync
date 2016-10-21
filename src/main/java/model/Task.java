@@ -43,6 +43,7 @@ public class Task extends Thread {
         this.collection = collection;
         this.parameters = parameters;
         this.maxDiff = maxDiff;
+        this.setName(collection.getNameFinal());
     }
 
     public Client getClientFrom() {
@@ -141,16 +142,16 @@ public class Task extends Thread {
         // Check is collection exist
         MongoDatabase database = to.getDatabase(collection.getDatabaseFinal());
         MongoIterable<String> strings = database.listCollectionNames();
-        boolean exist = false;
+/*        boolean exist = false;
         for (String col : strings) {
             if (col.equals(collection.getNameFinal())) {
                 exist = true;
             }
-        }
+        }*/
         // Case false create it
-        if (!exist) {
+/*        if (!exist) {
             database.createCollection(collection.getNameFinal());
-        }
+        }*/
 
         // Get records
         MongoCollection<Document> collectionResult = database.getCollection(this.collection.getNameFinal());
@@ -190,5 +191,7 @@ public class Task extends Thread {
                 new Index(to, this.collection, indexField).run();
             }
         }
+        // Show my name
+        System.out.println(this.getName());
     }
 }
