@@ -14,8 +14,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +26,7 @@ public class Controller {
     private static final int concurrentThreads = 1;
     private static SyncLogger syncLogger;
     private static ExecutorService executorService;
+    private static int timeout = 1000;
 
     private static Config getConfig(File configurationFile) {
         URL resource = null;
@@ -109,7 +112,7 @@ public class Controller {
                 syncLogger.logMessage(msg, SyncLogger.ANSI_WHITE, true);
 
                 // Wait for a set time.
-                Thread.sleep(1000);
+                Thread.sleep(timeout);
 
                 //FIXME: close connections
                 from.close();
